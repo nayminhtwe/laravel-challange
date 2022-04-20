@@ -5,37 +5,24 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        if (!$request->email) {
+
+        $validator = Validator::make($request->all(),[ 
+            'email' => 'required|min:6',
+            'password' => 'required|min:8',
+        ]);
+
+        if($validator->fails()){
             return response()->json([
                 'status'  => 422,
-                'message' => 'email is required'
+                'message' => $validator->messages()->first(),
             ]);
-        }
-        
-        if(strlen($request->email) < 6) {
-            return response()->json([
-                'status'  => 422,
-                'message' => 'email is invalid'
-            ]);
-        }
-    
-        if (!$request->password) {
-            return response()->json([
-                'status'  => 422,
-                'message' => 'password is required'
-            ]);
-        }
-        if(strlen($request->password) < 8) {
-            return response()->json([
-                'status'  => 422,
-                'message' => 'password is invalid'
-            ]);
-        }
+        };
     
         $user = User::where('email', $request->email)->first();
         if (!$user) {
