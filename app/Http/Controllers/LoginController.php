@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +31,7 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             return response()->json([
-                'user' => $user,
+                'user' => new UserResource($user),
                 'token' => $user->createToken('User-Token')->plainTextToken
             ]);
         } else {
