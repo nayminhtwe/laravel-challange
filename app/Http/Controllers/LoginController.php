@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -23,25 +24,21 @@ class LoginController extends Controller
                 'message' => $validator->messages()->first(),
             ]);
         };
-    
-        $user = User::where('email', $request->email)->first();
-        if (!$user) {
+
+        $credentials = $request->only('email', 'password');
+        
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
             return response()->json([
-                'status'  => 404,
-                'message' => 'Model not found.'
+                'user' => $user,
+                'token' => $user->createToken('User-Token')->plainTextToken
             ]);
-        }
-    
-        if (!Hash::check($request->password, $user->password)) {
+        } else {
             return response()->json([
                 'status'  => 404,
                 'message' => 'Invalid credentials'
             ]);
         }
-        
-        return response()->json([
-            'user' => $user,
-            'token' => $user->createToken('User-Token')->plainTextToken
-        ]);
+    
     }
 }
